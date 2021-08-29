@@ -1,14 +1,20 @@
+import { useEffect, useState } from 'react';
+
+import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
+import 'react-tabs/style/react-tabs.css';
+
 import FlashCards from '../components/FlashCards';
 import FlashCard from '../components/FlashCard';
 import Header from '../components/Header';
 import Main from '../components/Main';
 import Button from '../components/Button';
-import { useEffect, useState } from 'react';
-import { helperShuffleArray } from '../helpers/arrayHelpers';
 import RadioButton from '../components/RadioButton';
-import { apiGetAllFlashCards } from '../service/apiService';
 import Loading from '../components/Loading';
 import Error from '../components/Error';
+import FlashCardItem from '../components/FlashCardItem';
+
+import { helperShuffleArray } from '../helpers/arrayHelpers';
+import { apiGetAllFlashCards } from '../service/apiService';
 
 export default function FlashCardsPage() {
   const [allCards, setAllCards] = useState([]);
@@ -70,6 +76,10 @@ export default function FlashCardsPage() {
     setStudyCards(updatedCards);
   }
 
+  function handleDeleteFlashCard(cardId) {
+    console.log(cardId);
+  }
+
   let mainJsx = (
     <div className="flex justify-center my-4">
       <Loading />
@@ -87,44 +97,67 @@ export default function FlashCardsPage() {
   if (!loading) {
     mainJsx = (
       <>
-        <div className="text-center mb-4">
-          <Button onButtonClick={handleShuffle}>Shuffle Cards</Button>
-        </div>
+        <Tabs>
+          <TabList>
+            <Tab>Listagem</Tab>
+            <Tab>Cadastro</Tab>
+            <Tab>Estudo</Tab>
+          </TabList>
 
-        <div className="flex flex-row items-center justify-center space-x-4 m-4">
-          <RadioButton
-            id="radioButtonShowTitle"
-            name="showInfo"
-            buttonChecked={radioButtonShowTitle}
-            onButtonCLick={handleRadioShowTitle}
-          >
-            Show Title
-          </RadioButton>
+          <TabPanel>
+            {allCards.map(flashCard => {
+              return (
+                <FlashCardItem
+                  key={flashCard.id}
+                  onDelete={handleDeleteFlashCard}
+                >
+                  {flashCard}
+                </FlashCardItem>
+              );
+            })}
+          </TabPanel>
+          <TabPanel>Cadastro</TabPanel>
+          <TabPanel>
+            <div className="text-center mb-4">
+              <Button onButtonClick={handleShuffle}>Shuffle Cards</Button>
+            </div>
 
-          <RadioButton
-            id="radioButtonShowDescription"
-            name="showInfo"
-            buttonChecked={!radioButtonShowTitle}
-            onButtonCLick={handleRadioShowDescription}
-          >
-            Show Description
-          </RadioButton>
-        </div>
+            <div className="flex flex-row items-center justify-center space-x-4 m-4">
+              <RadioButton
+                id="radioButtonShowTitle"
+                name="showInfo"
+                buttonChecked={radioButtonShowTitle}
+                onButtonCLick={handleRadioShowTitle}
+              >
+                Show Title
+              </RadioButton>
 
-        <FlashCards>
-          {studyCards.map(({ id, title, description, showTitle }) => {
-            return (
-              <FlashCard
-                key={id}
-                id={id}
-                title={title}
-                description={description}
-                showFlashCardTitle={showTitle}
-                onToggleFlashCard={handleToggleFlashCard}
-              />
-            );
-          })}
-        </FlashCards>
+              <RadioButton
+                id="radioButtonShowDescription"
+                name="showInfo"
+                buttonChecked={!radioButtonShowTitle}
+                onButtonCLick={handleRadioShowDescription}
+              >
+                Show Description
+              </RadioButton>
+            </div>
+
+            <FlashCards>
+              {studyCards.map(({ id, title, description, showTitle }) => {
+                return (
+                  <FlashCard
+                    key={id}
+                    id={id}
+                    title={title}
+                    description={description}
+                    showFlashCardTitle={showTitle}
+                    onToggleFlashCard={handleToggleFlashCard}
+                  />
+                );
+              })}
+            </FlashCards>
+          </TabPanel>
+        </Tabs>
       </>
     );
   }
