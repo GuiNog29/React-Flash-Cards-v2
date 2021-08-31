@@ -15,12 +15,21 @@ import FlashCardItem from '../components/FlashCardItem';
 
 import { helperShuffleArray } from '../helpers/arrayHelpers';
 import { apiGetAllFlashCards } from '../service/apiService';
+import FlashCardForm from '../components/FlashCardForm';
 
 export default function FlashCardsPage() {
+  //Back-End
   const [allCards, setAllCards] = useState([]);
+
+  // Exclusivo para estudo
+  const [studyCards, setStudyCards] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [studyCards, setStudyCards] = useState([]);
+  const [createMode, setCreateMode] = useState(true);
+  const [selectedTab, setSelectedTab] = useState(0);
+  const [selectedFlashCard, setSelectedFlashCard] = useState(null);
+
   const [radioButtonShowTitle, setRadioButtonShowTitle] = useState(true);
 
   useEffect(() => {
@@ -77,7 +86,22 @@ export default function FlashCardsPage() {
   }
 
   function handleDeleteFlashCard(cardId) {
-    console.log(cardId);
+    setAllCards(allCards.filter(card => card.id !== cardId));
+  }
+
+  function handleEdiFlashCard(card) {
+    setCreateMode(false);
+    setSelectedTab(1);
+    setSelectedFlashCard(card);
+  }
+
+  function handleNewFlashCard() {
+    setCreateMode(true);
+    setSelectedFlashCard(null);
+  }
+  
+  function handleTabSelect(tabIndex) {
+    setSelectedTab(tabIndex);
   }
 
   let mainJsx = (
@@ -97,7 +121,7 @@ export default function FlashCardsPage() {
   if (!loading) {
     mainJsx = (
       <>
-        <Tabs>
+        <Tabs selectedIndex={selectedTab} onSelect={handleTabSelect}>
           <TabList>
             <Tab>Listagem</Tab>
             <Tab>Cadastro</Tab>
@@ -110,13 +134,21 @@ export default function FlashCardsPage() {
                 <FlashCardItem
                   key={flashCard.id}
                   onDelete={handleDeleteFlashCard}
+                  onEdit={handleEdiFlashCard}
                 >
                   {flashCard}
                 </FlashCardItem>
               );
             })}
           </TabPanel>
-          <TabPanel>Cadastro</TabPanel>
+
+          <TabPanel>
+            <div className="my-4">
+              <Button onButtonClick={handleNewFlashCard}>New Flash Card</Button>
+            </div>
+            <FlashCardForm createMode={createMode} />
+          </TabPanel>
+
           <TabPanel>
             <div className="text-center mb-4">
               <Button onButtonClick={handleShuffle}>Shuffle Cards</Button>

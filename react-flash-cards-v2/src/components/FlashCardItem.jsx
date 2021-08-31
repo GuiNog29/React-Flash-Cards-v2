@@ -18,7 +18,7 @@ export default function FlashCardItem({
 
   function handleEditIconClick() {
     if (onEdit) {
-      onDelete(flashCard.id);
+      onEdit(flashCard);
     }
   }
 
@@ -34,7 +34,11 @@ export default function FlashCardItem({
       </ul>
 
       <div className="mt-4 flex flex-row justify-end space-x-4">
-        <EditIcon className="cursor-pointer" size={24} onClick={handleEditIconClick}/>
+        <EditIcon
+          className="cursor-pointer"
+          size={24}
+          onClick={handleEditIconClick}
+        />
         <DeletIcon
           className="cursor-pointer"
           size={24}
