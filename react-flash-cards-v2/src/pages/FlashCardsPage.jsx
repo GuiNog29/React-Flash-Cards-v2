@@ -14,8 +14,9 @@ import Error from '../components/Error';
 import FlashCardItem from '../components/FlashCardItem';
 
 import { helperShuffleArray } from '../helpers/arrayHelpers';
-import { apiGetAllFlashCards } from '../service/apiService';
+import { apiDeleteFlashCard, apiGetAllFlashCards } from '../service/apiService';
 import FlashCardForm from '../components/FlashCardForm';
+import { getNewId } from '../service/idService';
 
 export default function FlashCardsPage() {
   //Back-End
@@ -85,8 +86,16 @@ export default function FlashCardsPage() {
     setStudyCards(updatedCards);
   }
 
-  function handleDeleteFlashCard(cardId) {
-    setAllCards(allCards.filter(card => card.id !== cardId));
+  async function handleDeleteFlashCard(cardId) {
+    try {
+      // Back-End
+      await apiDeleteFlashCard(cardId);
+
+      // Front-end
+      setAllCards(allCards.filter(card => card.id !== cardId));
+    } catch (error) {
+      setError(error.message);
+    }
   }
 
   function handleEdiFlashCard(card) {
@@ -99,9 +108,27 @@ export default function FlashCardsPage() {
     setCreateMode(true);
     setSelectedFlashCard(null);
   }
-  
+
   function handleTabSelect(tabIndex) {
     setSelectedTab(tabIndex);
+  }
+
+  function handlePersist(title, description) {
+    if (createMode) {
+      setAllCards([...allCards, { id: getNewId, title, description }]);
+    } else {
+      setAllCards(
+        allCards.map(card => {
+          if (card.id === selectedFlashCard.id) {
+            return { ...card, title, description };
+          }
+          return card;
+        })
+      );
+
+      setSelectedFlashCard(null);
+      setCreateMode(true);
+    }
   }
 
   let mainJsx = (
@@ -146,7 +173,9 @@ export default function FlashCardsPage() {
             <div className="my-4">
               <Button onButtonClick={handleNewFlashCard}>New Flash Card</Button>
             </div>
-            <FlashCardForm createMode={createMode} />
+            <FlashCardForm createMode={createMode} onPersist={handlePersist}>
+              {selectedFlashCard}
+            </FlashCardForm>
           </TabPanel>
 
           <TabPanel>
