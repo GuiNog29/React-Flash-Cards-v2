@@ -14,9 +14,13 @@ import Error from '../components/Error';
 import FlashCardItem from '../components/FlashCardItem';
 
 import { helperShuffleArray } from '../helpers/arrayHelpers';
-import { apiDeleteFlashCard, apiGetAllFlashCards } from '../service/apiService';
+import {
+  apiCreateFlashCard,
+  apiDeleteFlashCard,
+  apiGetAllFlashCards,
+  apiUpdateFlashCard,
+} from '../service/apiService';
 import FlashCardForm from '../components/FlashCardForm';
-import { getNewId } from '../service/idService';
 
 export default function FlashCardsPage() {
   //Back-End
@@ -93,6 +97,8 @@ export default function FlashCardsPage() {
 
       // Front-end
       setAllCards(allCards.filter(card => card.id !== cardId));
+
+      setError('');
     } catch (error) {
       setError(error.message);
     }
@@ -113,21 +119,40 @@ export default function FlashCardsPage() {
     setSelectedTab(tabIndex);
   }
 
-  function handlePersist(title, description) {
+  async function handlePersist(title, description) {
     if (createMode) {
-      setAllCards([...allCards, { id: getNewId, title, description }]);
-    } else {
-      setAllCards(
-        allCards.map(card => {
-          if (card.id === selectedFlashCard.id) {
-            return { ...card, title, description };
-          }
-          return card;
-        })
-      );
+      try {
+        // Back-End
+        const newFlashCard = await apiCreateFlashCard(title, description);
 
-      setSelectedFlashCard(null);
-      setCreateMode(true);
+        // Front-End
+        setAllCards([...allCards, newFlashCard]);
+
+        setError('');
+      } catch (error) {
+        setError(error.message);
+      }
+    } else {
+      try {
+        // Back-End
+        await apiUpdateFlashCard(selectedFlashCard.id, title, description);
+
+        // Front-End
+        setAllCards(
+          allCards.map(card => {
+            if (card.id === selectedFlashCard.id) {
+              return { ...card, title, description };
+            }
+            return card;
+          })
+        );
+
+        setSelectedFlashCard(null);
+        setCreateMode(true);
+        setError('');
+      } catch (error) {
+        setError(error.message);
+      }
     }
   }
 
@@ -145,7 +170,7 @@ export default function FlashCardsPage() {
     );
   }
 
-  if (!loading) {
+  if (!loading && !error) {
     mainJsx = (
       <>
         <Tabs selectedIndex={selectedTab} onSelect={handleTabSelect}>
