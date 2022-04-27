@@ -1,3 +1,3 @@
 # React-Flash-Cards-v2
 
-# Projeto desenvolvido acompanhando vídeos do bootcamp de ract - IGTI
+# Projeto desenvolvido acompanhando vídeos do bootcamp de React - IGTI
